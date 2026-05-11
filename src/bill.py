@@ -1,3 +1,5 @@
+from datetime import datetime
+
 # 商品情報の登録
 items = [
     {'name': 'りんご', 'price': 100, 'stock': 10},
@@ -7,6 +9,79 @@ items = [
     {'name': '牛乳', 'price': 300, 'stock': 25},
     {'name': '魚', 'price': 400, 'stock': 30}
 ]
+
+# 商品注文機能
+# ・返り値の辞書型の詳細
+# キーは商品名 "name" と購入個数 "count" と items のインデックス "items_index" で構成
+# 例：
+# [
+#     {
+#         "items_index": 0,
+#         "name": "りんご",
+#         "count": 5,
+#     }
+# ]
+def order_items() -> tuple[int, list[dict[str, int|str]], datetime]:
+    # 1. 注文する商品名と在庫数を表示
+    print("* 商品一覧 ***********")
+    print("商品名\t価格\t在庫数")
+    for item in items:
+        print(f"{item['name']}\t{item['price']}\t{item['stock']}")
+    print("**********************")
+    
+    # 2. 注文する商品名と注文数を入力
+    order_list = []
+    ITEM_NAME_LIST = [item['name'] for item in items]
+    while True:
+        # 商品選択
+        print("\n商品名を入力してください（注文を終了する場合は 'end' を入力してください）")
+        user_input = input()
+        if user_input == "end":
+            break
+
+        # リスト内に存在しない処理を弾くエラー処理
+        try:
+            order_item_index = ITEM_NAME_LIST.index(user_input)
+        except ValueError:
+            print("[Error] 存在する商品名を入力してください")
+            continue
+        order_item_name = user_input
+
+        # 購入数設定
+        print("購入個数を入力してください")
+        user_input = input()
+        
+        # 購入数が有効を満たすかの判定
+        try:
+            order_count = int(user_input)
+        except ValueError:
+            print("[Error] 有効な整数値を入力してください")
+            continue
+        if order_count < 1:
+            print("[Error] 1以上の数値を入力してください")
+            continue
+        if order_count > items[order_item_index]["stock"]:
+            print(f"[Error] オーダー数は在庫数以下にしてください（'{order_item_name}' のオーダー数は {items[order_item_index]["stock"]} 以下にしてください）")
+            continue
+
+        items[order_item_index]["stock"] -= order_count
+        order_list.append({"items_index": order_item_index, "name": order_item_name, "count": order_count})
+
+        print(f"'{order_item_name}'を{order_count}個注文リストに追加しました")
+
+    # 3. 注文内容の表示と合計金額の集計・表示
+    total_price = 0
+    print("* 注文内容 ***********")
+    print("商品名\t個数\t金額")
+    for order in order_list:
+        price = items[order["items_index"]]["price"] * order['count']
+        print(f"{order['name']}\t{order['count']}\t{price}")
+        total_price += price
+    print(f"合計金額：{total_price}")
+    print("**********************")
+
+    now = datetime.now()
+    return total_price, order_list, now
 
 if __name__ == '__main__':
     print('お会計システム作成')
