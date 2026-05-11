@@ -1,3 +1,5 @@
+from datetime import datetime
+
 # 商品情報の登録
 items = [
     {'name': 'りんご', 'price': 100, 'stock': 10},
